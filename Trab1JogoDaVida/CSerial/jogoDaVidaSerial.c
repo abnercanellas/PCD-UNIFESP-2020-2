@@ -50,7 +50,7 @@ int getNeighbors(int *grid, int i, int j){ //conta numero de vizinhos atualmente
     return n;
 }
 
-void printField(int *grid, int generation){ //printar o "mundo"
+void printField(int *grid){ //printar o "mundo"
     int i,j,n=0,m=0,v=0;
     for(i=0; i < DIMENTION; i++){
         for (j = 0; j < DIMENTION; j++){
@@ -79,16 +79,14 @@ void printField(int *grid, int generation){ //printar o "mundo"
 }
 
 int newCellState(int* gen, int i, int j){//Define o futuro da celula de acordo com as regras
-    int n=0;
+    int n = getNeighbors(gen, i,j); //conta vizinhos
 
-    n = getNeighbors(gen, i,j); //conta vizinhos
-
-    if(gen[i * DIMENTION + j]==1){ //se a celula esta viva
+    if(gen[i * DIMENTION + j] == 1){ //se a celula esta viva
         if(n < 2){
             return 0;  //Morre por abandono
-        }else if(n==2 || n==3){
+        }else if(n == 2 || n == 3){
             return 1;  //Permanece viva
-        }else if(n>=4){
+        }else if(n >= 4){
             return 0;  //Morre por superpopulacao
         }
     }
@@ -125,11 +123,11 @@ int main(){
     populate(grid);
 
     countFinalCells(grid, 0);
-    //printField(grid, 0);
+    //printField(grid);
     for(int i = 1; i<=NGENERATIONS; i++){
         newGen(grid, auxGrid); //optei por criar a matriz auxiliar aqui pra só ocorrer uma alocação dela, ao invez de uma alocação por for
         countFinalCells(grid, i);
-        //printField(grid, i);
+        //printField(grid);
         //getNeighbors(grid, 2, 2); //teste "Vizinhos por ponto" (Liberar print corresp em getNeighbors() )
     }
     //countFinalCells(grid, NGENERATIONS);
