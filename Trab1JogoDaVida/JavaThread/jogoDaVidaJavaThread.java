@@ -1,18 +1,18 @@
-package JavaSerial;
+package JavaThread;
 
 import java.util.Random;
+import java.lang.Thread;
 
-//Lembrar de compilar com javac JavaSerial/jogoDaVidaJavaSerial.java 
-// e exec com java JavaSerial.jogoDaVidaJavaSerial
+//Lembrar de compilar com javac JavaThread/jogoDaVidaJavaThread.java 
+// e exec com java JavaThread.jogoDaVidaJavaThread 
 
-public class jogoDaVidaJavaSerial {
+public class jogoDaVidaJavaThread {
 
     static private int DIMENTION =2048; //2048*2048​ e um total de ​2000​ geracoes
     static private int NGENERATIONS = 2000;
 
     static private void populate(int[] grid){
         Random gerador = new Random(1985);
-
         int i, j;
         for(i = 0; i<DIMENTION; i++) { //laço sobre as células do tabuleiro sem contar comum eventual halo
                 for(j = 0; j<DIMENTION; j++){
@@ -23,11 +23,10 @@ public class jogoDaVidaJavaSerial {
 
     static private void countFinalCells(int[] grid, int generation){
         int n=0;
-    
+
         for (int i : grid) {
             if(i==1) n++ ;
         }
-        
         System.out.println("Geracao " + generation + ": " + n);
     }
 
@@ -46,33 +45,6 @@ public class jogoDaVidaJavaSerial {
 
         return n;
     }
-
-    /* static private void printField(int[] grid, int generation){
-        int i, j, n=0, m=0, v=0;
-        for (i=0; i<DIMENTION;i++) {
-            for(j=0; j<DIMENTION; j++){
-                System.out.print("| " + grid[i * DIMENTION + j] + " "); 
-            }
-            //Teste Printa matriz de vizinhos e soma mortos+nascidos
-            System.out.print("|         ");        
-            for (j = 0; j < DIMENTION; j++){
-                int offset = i * DIMENTION + j;
-                n = getNeighbors(grid,i,j);
-                if(grid[offset]==1){ //se a celula esta viva
-                    if(n < 2){
-                        m++;  //Morre por abandono
-                    }else if(n>=4){
-                        m++;  //Morre por superpopulacao
-                    }
-                }
-                else if(n==3){ //se a celula esta morta
-                    v++;  //Ganha vida
-                }
-                System.out.print("| " + n + " - " + grid[offset] + " "); //vai printar | nVizinhos - statusCelula na tabela da 
-            }
-            System.out.println("|   m: " + m + " v: " + v);
-        }
-    } */
 
     static private int newCellState(int[] gen, int i, int j){
         int n = getNeighbors(gen, i, j);
@@ -94,7 +66,7 @@ public class jogoDaVidaJavaSerial {
     }
 
     static private int[] newGen(int[] gen, int[] auxGen){
-
+        
         int i,j;
         for(i=0; i < DIMENTION; i++){
             for (j = 0; j < DIMENTION; j++){
