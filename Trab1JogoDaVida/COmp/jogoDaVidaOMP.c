@@ -1,37 +1,33 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/time.h>
 #include <omp.h>
+#include <sys/time.h>
 
 #define SRAND_VALUE 1985
-#define DIMENTION 2048 //2048*2048​ e um total de ​2000​ gerações
+#define DIMENTION 2048 //2048*2048​ e um total de ​2000​ geracoes
 #define NGENERATIONS 2000
-#define THREADS 16
+#define THREADS 8
 
 void populate(int *grid){ //popula aleatoriamente a matriz
     srand(SRAND_VALUE);
-#pragma omp parallel shared(grid) num_threads(THREADS)
-    {
-        int i, j;
-        #pragma omp for
-        for(i = 0; i<DIMENTION; i++) { 
-            for(j = 0; j<DIMENTION; j++) {     
-                grid[i * DIMENTION + j] = rand() % 2; 
-            }
+    int i, j;
+    for(i = 0; i<DIMENTION; i++) { 
+        for(j = 0; j<DIMENTION; j++) {     
+            grid[i * DIMENTION + j] = rand() % 2; 
         }
     }
 }
 
 void countFinalCells(int *grid, int generation){ //Conta o total de celulas vivas no fim da i geração
     int n=0, i, j;
-#pragma omp parallel shared(grid) private(i,j) reduction(+:n) num_threads(THREADS)
+    #pragma omp parallel shared(grid) private(i,j) reduction(+:n) num_threads(THREADS)
     {  
         #pragma omp for
         for(i=0; i < DIMENTION; i++){
             for (j = 0; j < DIMENTION; j++) 
                 if(grid[i * DIMENTION + j]==1) n++ ;
         }
-    }    
+    }
     printf("Geracao %d: %d\n", generation, n);
 }
 
@@ -47,20 +43,19 @@ int getNeighbors(int *grid, int i, int j){ //conta numero de vizinhos atualmente
     n = grid[ni*DIMENTION +nj] + grid[ni*DIMENTION +j] + grid[ni*DIMENTION +pj] + 
         grid[i*DIMENTION +nj] + grid[i*DIMENTION +pj] + 
         grid[pi*DIMENTION +nj] + grid[pi*DIMENTION +j] + grid[pi*DIMENTION +pj];
+
     return n;
 }
 
 int newCellState(int* gen, int i, int j){//Define o futuro da celula de acordo com as regras
-    int n=0;
+    int n = getNeighbors(gen, i,j); //conta vizinhos
 
-    n = getNeighbors(gen, i,j); //conta vizinhos
-
-    if(gen[i * DIMENTION + j]==1){ //se a celula esta viva
+    if(gen[i * DIMENTION + j] == 1){ //se a celula esta viva
         if(n < 2){
             return 0;  //Morre por abandono
-        }else if(n==2 || n==3){
+        }else if(n == 2 || n == 3){
             return 1;  //Permanece viva
-        }else if(n>=4){
+        }else if(n >= 4){
             return 0;  //Morre por superpopulacao
         }
     }
@@ -69,18 +64,18 @@ int newCellState(int* gen, int i, int j){//Define o futuro da celula de acordo c
     }
 }
 
-void newGen(int *gen, int* auxGen){
+void newGen(int *gen, int* auxGen){ //funcao que realiza a atualização da geracao
 
     int i,j;
-    #pragma omp parallel shared(gen, auxGen) private(i,j) num_threads(THREADS)
+    #pragma omp parallel shared(gen, auxGen) private(i,j) num_threads(THREADS) 
     {
         #pragma omp for
         for(i=0; i < DIMENTION; i++){
             for (j = 0; j < DIMENTION; j++){
                 auxGen[i * DIMENTION + j] =  newCellState(gen, i, j);
-            }
         }
     }
+        }
     for (i=0;i<(DIMENTION*DIMENTION);i++){
         gen[i]=auxGen[i];
     }
@@ -90,19 +85,15 @@ int main(){
 
     struct timeval begin, end;
     gettimeofday(&begin,0);
-    
 
-    //fiz a alocacao em 1 vetor para melhorar a performance de acesso em mem
-    //acesso a grid[i][j] deve ser feito por grid[i * DIMENTION + j]
     int *grid = (int *)malloc(DIMENTION * DIMENTION *sizeof(int)), *auxGrid = (int *)malloc(DIMENTION * DIMENTION *sizeof(int));
     
     populate(grid);
 
     countFinalCells(grid, 0);
     for(int i = 1; i<=NGENERATIONS; i++){
-        newGen(grid, auxGrid); //optei por criar a matriz auxiliar aqui pra só ocorrer uma alocação dela, ao invez de uma alocação por for
+        newGen(grid, auxGrid);
         countFinalCells(grid, i);
-        
     }
 
     gettimeofday(&end,0);
@@ -110,7 +101,7 @@ int main(){
     long mic = end.tv_usec - begin.tv_usec;
     double elap = sec - mic*1e-6;
 
-    printf("Tempo total: %.4f secs", elap);
-    
+    printf("Tempo total: %.4f secs\n", elap);
+
     return 0;
 }
