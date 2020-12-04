@@ -1,19 +1,19 @@
 package JavaThread;
 
 import java.util.Random;
+import java.lang.Thread;
 
 //Lembrar de compilar com javac JavaThread/jogoDaVidaJavaThread.java 
 // e exec com java JavaThread.jogoDaVidaJavaThread 
 
 public class jogoDaVidaJavaThread {
 
-    static private int DIMENTION = 10; //2048*2048​ e um total de ​2000​ geracoes
-    static private int NGENERATIONS = 10;
-    static private int THREADS = 1;
-
+    static private int DIMENTION = 2048; //2048*2048​ e um total de ​2000​ geracoes
+    static private int NGENERATIONS = 2000;
+    static private int THREADS = 8;
     
     static private countFinalCellsThread[] cFCT = new countFinalCellsThread[THREADS];
-    //static private newGenThread[] nGT = new newGenThread[THREADS];
+    static private newGenThread[] nGT = new newGenThread[THREADS];
     static private Thread[] th = new Thread[THREADS*2];
 
     static private void populate(int[] grid){
@@ -43,52 +43,46 @@ public class jogoDaVidaJavaThread {
             }
         }
         System.out.println("Geracao " + generation + ": " + n);
-    }
-
-    static private int getNeighbors(int[] grid, int i, int j){
-        int n=0, ni = i-1, nj = j-1, pi = i+1, pj = j+1 ; // ni, nj, pi, pj representam i-1, j-1, i+1, j+1
-
-        ni = ni%DIMENTION < 0 ? DIMENTION-1 : ni;
-        nj = nj%DIMENTION < 0 ? DIMENTION-1 : nj;
-        pi = pi%DIMENTION;
-        pj = pj%DIMENTION;
+        /* int n=0;
     
+        for (int i : grid) {
+            if(i==1) n++ ;
+        }
         
-        n = grid[ni*DIMENTION +nj] + grid[ni*DIMENTION +j] + grid[ni*DIMENTION +pj] + 
-            grid[i*DIMENTION +nj] + grid[i*DIMENTION +pj] + 
-            grid[pi*DIMENTION +nj] + grid[pi*DIMENTION +j] + grid[pi*DIMENTION +pj];
-
-        return n;
-    }
-
-    static private int newCellState(int[] gen, int i, int j){
-        int n = getNeighbors(gen, i, j);
-        int k=0;
-
-        if(gen[i * DIMENTION + j] == 1){ //se a celula esta viva
-            if(n < 2){
-                k = 0;  //Morre por abandono
-            }else if(n == 2 || n == 3){
-                k =  1;  //Permanece viva
-            }else if(n >= 4){
-                k =  0;  //Morre por superpopulacao
-            }
-        }
-        else if(n==3){ //se a celula esta morta
-            k =  1;  //Ganha vida
-        }
-        return k;
+        System.out.println("Geracao " + generation + ": " + n); */
     }
 
     static private int[] newGen(int[] gen, int[] auxGen){
-//add thread aqui        
+//add thread aqui
+
+        for(int t = 0; t< THREADS; t++){
+            nGT[t] = new newGenThread(gen, auxGen, t, DIMENTION, THREADS);
+            th[t*2] = new Thread(nGT[t]);
+            th[t*2].start();
+        }
+        for(int t = 0; t < THREADS; t++){
+            try {
+                th[t*2].join();
+                for(int i=t; i < DIMENTION; i+=THREADS){
+                    for (int j = 0; j < DIMENTION; j++){
+                        auxGen[i * DIMENTION +j] = nGT[t].getNauxGen()[i * DIMENTION +j];
+                    }
+                }
+            } catch (InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+
+        /*         
         int i,j;
         for(i=0; i < DIMENTION; i++){
             for (j = 0; j < DIMENTION; j++){
                 int offset = i * DIMENTION + j;
                 auxGen[offset] =  newCellState(gen, i, j);
             }
-        }
+        } */
+
         return auxGen;
     }
 

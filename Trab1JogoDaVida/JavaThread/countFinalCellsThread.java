@@ -7,7 +7,7 @@ public class countFinalCellsThread implements Runnable{
         cgrid = grid;
         thId = thID;
         Dim = DIM;
-        nThreads = NTHREADS;
+        nThreads = DIM<NTHREADS ? DIM : NTHREADS;
     }
     public void run() {
         for (int j = thId; j < (Dim*Dim); j+=nThreads) {
