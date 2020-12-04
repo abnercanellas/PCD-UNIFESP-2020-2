@@ -1,15 +1,20 @@
 package JavaThread;
 
 import java.util.Random;
-import java.lang.Thread;
 
 //Lembrar de compilar com javac JavaThread/jogoDaVidaJavaThread.java 
 // e exec com java JavaThread.jogoDaVidaJavaThread 
 
 public class jogoDaVidaJavaThread {
 
-    static private int DIMENTION =2048; //2048*2048​ e um total de ​2000​ geracoes
-    static private int NGENERATIONS = 2000;
+    static private int DIMENTION = 10; //2048*2048​ e um total de ​2000​ geracoes
+    static private int NGENERATIONS = 10;
+    static private int THREADS = 1;
+
+    
+    static private countFinalCellsThread[] cFCT = new countFinalCellsThread[THREADS];
+    //static private newGenThread[] nGT = new newGenThread[THREADS];
+    static private Thread[] th = new Thread[THREADS*2];
 
     static private void populate(int[] grid){
         Random gerador = new Random(1985);
@@ -24,8 +29,18 @@ public class jogoDaVidaJavaThread {
     static private void countFinalCells(int[] grid, int generation){
         int n=0;
 
-        for (int i : grid) {
-            if(i==1) n++ ;
+        for(int t = 0; t < THREADS; t++){
+            cFCT[t] = new countFinalCellsThread(grid, t, DIMENTION, THREADS);
+            th[t] = new Thread(cFCT[t]);
+            th[t].start();
+        }
+        for(int t = 0; t < THREADS; t++){
+            try {
+                th[t].join();
+                n+=cFCT[t].getN();
+            } catch (InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
         }
         System.out.println("Geracao " + generation + ": " + n);
     }
@@ -66,7 +81,7 @@ public class jogoDaVidaJavaThread {
     }
 
     static private int[] newGen(int[] gen, int[] auxGen){
-        
+//add thread aqui        
         int i,j;
         for(i=0; i < DIMENTION; i++){
             for (j = 0; j < DIMENTION; j++){

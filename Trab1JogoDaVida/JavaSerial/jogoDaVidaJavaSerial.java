@@ -7,8 +7,8 @@ import java.util.Random;
 
 public class jogoDaVidaJavaSerial {
 
-    static private int DIMENTION =2048; //2048*2048​ e um total de ​2000​ geracoes
-    static private int NGENERATIONS = 2000;
+    static private int DIMENTION = 10; //2048*2048​ e um total de ​2000​ geracoes
+    static private int NGENERATIONS = 10;
 
     static private void populate(int[] grid){
         Random gerador = new Random(1985);
