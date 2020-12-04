@@ -10,7 +10,7 @@ public class jogoDaVidaJavaThread {
 
     static private int DIMENTION = 2048; //2048*2048​ e um total de ​2000​ geracoes
     static private int NGENERATIONS = 2000;
-    static private int THREADS = 8;
+    static private int THREADS = 2;
     
     static private countFinalCellsThread[] cFCT = new countFinalCellsThread[THREADS];
     static private newGenThread[] nGT = new newGenThread[THREADS];
@@ -19,7 +19,7 @@ public class jogoDaVidaJavaThread {
     static private void populate(int[] grid){
         Random gerador = new Random(1985);
         int i, j;
-        for(i = 0; i<DIMENTION; i++) { //laço sobre as células do tabuleiro sem contar comum eventual halo
+        for(i = 0; i<DIMENTION; i++) {
                 for(j = 0; j<DIMENTION; j++){
                     grid[i * DIMENTION +j] = gerador.nextInt(2147483647) % 2;
             }
@@ -43,17 +43,9 @@ public class jogoDaVidaJavaThread {
             }
         }
         System.out.println("Geracao " + generation + ": " + n);
-        /* int n=0;
-    
-        for (int i : grid) {
-            if(i==1) n++ ;
-        }
-        
-        System.out.println("Geracao " + generation + ": " + n); */
     }
 
     static private int[] newGen(int[] gen, int[] auxGen){
-//add thread aqui
 
         for(int t = 0; t< THREADS; t++){
             nGT[t] = new newGenThread(gen, auxGen, t, DIMENTION, THREADS);
@@ -72,17 +64,6 @@ public class jogoDaVidaJavaThread {
                 System.out.println(e.getMessage());
             }
         }
-
-
-        /*         
-        int i,j;
-        for(i=0; i < DIMENTION; i++){
-            for (j = 0; j < DIMENTION; j++){
-                int offset = i * DIMENTION + j;
-                auxGen[offset] =  newCellState(gen, i, j);
-            }
-        } */
-
         return auxGen;
     }
 
