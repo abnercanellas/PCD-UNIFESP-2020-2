@@ -6,15 +6,23 @@
 #define SRAND_VALUE 1985
 #define DIMENTION 2048 //2048*2048​ e um total de ​2000​ geracoes
 #define NGENERATIONS 2000
-#define THREADS 16
+#define THREADS 2
+
+
+struct argsCF_t{
+    int id, n;
+    int* gen; 
+};
+typedef struct argsCF_t argsCF_t;
 
 struct argsNCS_t{
-    int id, n;
+    int id, i, j, n;
     int *gen, *auxGen; 
 };
 typedef struct argsNCS_t argsNCS_t;
 
 pthread_t pt[THREADS];
+argsCF_t aCF[THREADS];
 argsNCS_t aNCS[THREADS];
 
 
@@ -29,7 +37,7 @@ void populate(int *grid){ //popula aleatoriamente a matriz
 }
 
 void *countFinalCells(void *args){ //Conta o total de celulas vivas no fim da i geração
-    argsNCS_t *arg =(argsNCS_t*) args;
+    argsCF_t *arg =(argsCF_t*) args;
     int i, j;
     arg->n=0;
 
@@ -55,47 +63,54 @@ int getNeighbors(int *grid, int i, int j){ //conta numero de vizinhos atualmente
     return n;
 }
 
+
 void *newCellState(void *args){//Define o futuro da celula de acordo com as regras
     argsNCS_t *arg = (argsNCS_t*) args;
+    int n = getNeighbors(arg->gen, (int)arg->i,(int)arg->j); //conta vizinhos
 
-    for(int i = (int)arg->id; i < DIMENTION; i+=THREADS){
-        for(int j=0; j< DIMENTION;j++){
-            int n = getNeighbors(arg->gen, i, j);
-            int k = 0;
-
-            if(arg->gen[i*DIMENTION+j]==1){
-                 if(n < 2){
-                    k = 0;  //Morre por abandono
-                }else if(n == 2 || n == 3){
-                    k =  1;  //Permanece viva
-                }else if(n >= 4){
-                    k =  0;  //Morre por superpopulacao
-                }
-            }else if(n==3){ //se a celula esta morta
-                k =  1;  //Ganha vida
-            }
-            arg->auxGen[i*DIMENTION+j]=k;
+    if((int)arg->gen[arg->i * DIMENTION + arg->j] == 1){ //se a celula esta viva
+        if(n < 2){
+            arg->auxGen[arg->i * DIMENTION + arg->j] = 0;  //Morre por abandono
+        }else if(n == 2 || n == 3){
+            arg->auxGen[arg->i * DIMENTION + arg->j] = 1;  //Permanece viva
+        }else if(n >= 4){
+            arg->auxGen[arg->i * DIMENTION + arg->j] =  0;  //Morre por superpopulacao
         }
+    }
+    else if(n==3){ //se a celula esta morta
+        arg->auxGen[arg->i * DIMENTION + arg->j] =  1;  //Ganha vida
     }
 }
 
 void newGen(int *gen, int *auxGen){ //funcao que realiza a atualização da geracao
-    
+
     for (int t = 0; t < THREADS; t++){
         aNCS[t].id=t;
         aNCS[t].gen=gen;
-        aNCS[t].auxGen=auxGen;
-        pthread_create(&pt[t],NULL, newCellState, (void*)&aNCS[t]);
-    }
-    for (int t = 0; t < THREADS; t++){
-        pthread_join(pt[t],NULL);
-        for (int i = t*DIMENTION; i < DIMENTION/THREADS; i++){
-            auxGen[i] = (int)aNCS[t].auxGen[i];
+        for(int i=t; i < DIMENTION; i+=THREADS){
+            for (int j = 0; j < DIMENTION; j++){
+                aNCS[t].i=i;
+                aNCS[t].j=j;
+                pthread_create(&pt[t], NULL, newCellState, (void*)&aNCS[t]);
+            }
+            for (int t = 0; t < THREADS; t++){
+                pthread_join(pt[t],NULL);
+                gen[(int)aNCS[t].i * DIMENTION + (int)aNCS[t].j] = (int)aNCS[t].n;
+            }
+    
         }
     }
-    for (int i=0;i<(DIMENTION*DIMENTION);i++){
-        gen[i]=auxGen[i];
+    
+/* 
+    int i,j;
+    for(i=0; i < DIMENTION; i++){
+        for (j = 0; j < DIMENTION; j++){
+            auxGen[i * DIMENTION + j] =  newCellState(gen, i, j);
+        }
     }
+    for (i=0;i<(DIMENTION*DIMENTION);i++){
+        gen[i]=auxGen[i];
+    } */
 }
 
 int main(){
@@ -109,20 +124,24 @@ int main(){
     
     populate(grid);
 
+    //countFinalCells(grid, 0);
+    //printf("Geracao %d: %d\n", arg.generation, n);
     for(int i = 1; i<=NGENERATIONS; i++){
 
         total=0;
         newGen(grid, auxGrid); 
         for(int t = 0; t<THREADS; t++){
-            aNCS[t].id=t;
-            aNCS[t].gen = grid;
-            pthread_create(&pt[t],NULL, countFinalCells, (void*)&aNCS[t]);
+            aCF[t].id=t;
+            aCF[t].gen = grid;
+            pthread_create(&pt[t],NULL, countFinalCells, (void*)&aCF[t]);
         }
         for(int t = 0; t<THREADS; t++){
             pthread_join(pt[t],NULL);
-            total+=aNCS[t].n;
+            total+=aCF[t].n;
         }
         printf("Geracao %d: %d\n", i, total);
+
+        //printf("Geracao %d: %d\n");
     }
 
     gettimeofday(&end,0);
@@ -130,6 +149,7 @@ int main(){
     long mic = end.tv_usec - begin.tv_usec;
     double elap = sec - mic*1e-6;
 
-    printf("Tempo total: %.4f secs\n", elap);
+    printf("Tempo total: %.4f secs", elap);
+
     return 0;
 }

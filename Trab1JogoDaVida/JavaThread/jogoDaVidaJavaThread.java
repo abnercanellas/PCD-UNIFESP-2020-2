@@ -10,7 +10,7 @@ public class jogoDaVidaJavaThread {
 
     static private int DIMENTION = 2048; //2048*2048​ e um total de ​2000​ geracoes
     static private int NGENERATIONS = 2000;
-    static private int THREADS = 2;
+    static private int THREADS = 16;
     
     static private countFinalCellsThread[] cFCT = new countFinalCellsThread[THREADS];
     static private newGenThread[] nGT = new newGenThread[THREADS];
