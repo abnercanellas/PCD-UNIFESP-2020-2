@@ -6,7 +6,7 @@
 #define SRAND_VALUE 1985
 #define DIMENTION 2048 //2048*2048​ e um total de ​2000​ geracoes
 #define NGENERATIONS 2000
-#define THREADS 16
+#define THREADS 8
 
 struct argsNCS_t{
     int id, n;
@@ -130,6 +130,6 @@ int main(){
     long mic = end.tv_usec - begin.tv_usec;
     double elap = sec - mic*1e-6;
 
-    printf("Tempo total: %.4f secs\n", elap);
+    //printf("Tempo total: %.4f secs\n", elap);
     return 0;
 }

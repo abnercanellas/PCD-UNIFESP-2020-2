@@ -7,7 +7,6 @@
 #define DIMENTION 2048 //2048*2048​ e um total de ​2000​ geracoes
 #define NGENERATIONS 2000
 #define THREADS 8
-int b=0;
 
 void populate(int *grid){ //popula aleatoriamente a matriz
     srand(SRAND_VALUE);
@@ -17,7 +16,6 @@ void populate(int *grid){ //popula aleatoriamente a matriz
             grid[i * DIMENTION + j] = rand() % 2; 
         }
     }
-    b=1;
 }
 
 void countFinalCells(int *grid, int generation){ //Conta o total de celulas vivas no fim da i geração
@@ -103,7 +101,7 @@ int main(){
     long mic = end.tv_usec - begin.tv_usec;
     double elap = sec - mic*1e-6;
 
-    printf("Tempo total: %.4f secs %d\n", elap, b);
+    //printf("Tempo total: %.4f sec", elap);
 
     return 0;
 }

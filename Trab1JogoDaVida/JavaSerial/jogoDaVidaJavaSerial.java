@@ -125,7 +125,7 @@ public class jogoDaVidaJavaSerial {
 
         long endTime = System.nanoTime();
         long elapsed = (endTime - startTime) / 1000000;
-        System.out.println("Tempo total: " + elapsed + "ms");
+        //System.out.println("Tempo total: " + elapsed + "ms");
     }
 
 }

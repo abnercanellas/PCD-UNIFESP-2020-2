@@ -3,8 +3,8 @@
 #include <sys/time.h>
 
 #define SRAND_VALUE 1985
-#define DIMENTION 10 //2048*2048​ e um total de ​2000​ geracoes
-#define NGENERATIONS 10
+#define DIMENTION 2048 //2048*2048​ e um total de ​2000​ geracoes
+#define NGENERATIONS 2000
 
 void populate(int *grid){ //popula aleatoriamente a matriz
     srand(SRAND_VALUE);
@@ -123,7 +123,7 @@ int main(){
     populate(grid);
 
     countFinalCells(grid, 0);
-    printField(grid);
+    //printField(grid);
     for(int i = 1; i<=NGENERATIONS; i++){
         newGen(grid, auxGrid); //optei por criar a matriz auxiliar aqui pra só ocorrer uma alocação dela, ao invez de uma alocação por for
         countFinalCells(grid, i);
@@ -138,7 +138,7 @@ int main(){
     long mic = end.tv_usec - begin.tv_usec;
     double elap = sec - mic*1e-6;
 
-    printf("Tempo total: %.4f secs", elap);
+    //printf("Tempo total: %.4f secs", elap);
 
     return 0;
 }

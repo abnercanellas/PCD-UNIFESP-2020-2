@@ -10,7 +10,7 @@ public class jogoDaVidaJavaThread {
 
     static private int DIMENTION = 2048; //2048*2048​ e um total de ​2000​ geracoes
     static private int NGENERATIONS = 2000;
-    static private int THREADS = 16;
+    static private int THREADS = 8;
     
     static private countFinalCellsThread[] cFCT = new countFinalCellsThread[THREADS];
     static private newGenThread[] nGT = new newGenThread[THREADS];
@@ -87,7 +87,7 @@ public class jogoDaVidaJavaThread {
 
         long endTime = System.nanoTime();
         long elapsed = (endTime - startTime) / 1000000;
-        System.out.println("Tempo total: " + elapsed + "ms");
+        //System.out.println("Tempo total: " + elapsed + "ms");
     }
 
 }
