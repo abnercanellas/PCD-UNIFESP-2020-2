@@ -21,8 +21,8 @@ void populate(int *grid){ //popula aleatoriamente a matriz
 }
 
 void countFinalCells(int *grid, int generation){ //Conta o total de celulas vivas no fim da i geração
-    // struct timeval begin, end;
-    // gettimeofday(&begin,0);
+    struct timeval begin, end;
+    gettimeofday(&begin,0);
 
     int i, j;
     #pragma omp parallel shared(grid) private(i,j) reduction(+:total) num_threads(THREADS)
@@ -35,11 +35,11 @@ void countFinalCells(int *grid, int generation){ //Conta o total de celulas viva
     }
     printf("Geracao %d: %d\n", generation, total);
 
-    // gettimeofday(&end,0);
-    // long sec = end.tv_sec - begin.tv_sec;
-    // long mic = end.tv_usec - begin.tv_usec;
-    // double elap = sec + mic*1e-6;
-    // printf("Tempo total: %.4f sec", elap); 
+    gettimeofday(&end,0);
+    long sec = end.tv_sec - begin.tv_sec;
+    long mic = end.tv_usec - begin.tv_usec;
+    double elap = sec + mic*1e-6;
+    printf("Tempo total: %.4f sec", elap); 
     
     // Serial/1Thread func=0.0076s real=148,783s
     // 2Threads func=0.0044s real=91,605s
