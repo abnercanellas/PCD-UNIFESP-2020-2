@@ -5,8 +5,8 @@
 #include <sys/time.h>
 
 #define SRAND_VALUE 1985
-#define DIMENTION 20 //2048*2048​ e um total de ​2000​ geracoes
-#define NGENERATIONS 20
+#define DIMENTION 5 //2048*2048​ e um total de ​2000​ geracoes
+#define NGENERATIONS 5
 
 
 void populate(int *grid){ //popula aleatoriamente a matriz
@@ -102,17 +102,26 @@ int newCellState(int* gen, int i, int j){//Define o futuro da celula de acordo c
 
 void newGen(int *gen, int* auxGen){ //funcao que realiza a atualização da geracao
 
-    int i, j, myId, nProc;
+    int i, j, myId, nProc, t1=0, t2=0;
     MPI_Comm_size( MPI_COMM_WORLD , &nProc);
     MPI_Comm_rank( MPI_COMM_WORLD , &myId);
+
     for(i=myId; i < DIMENTION; i+=nProc){
         for (j = 0; j < DIMENTION; j++){
-            auxGen[i * DIMENTION + j] =  newCellState(gen, i, j);
+            //auxGen[i * DIMENTION + j] =  newCellState(gen, i, j);
+            t1++;
         }
     }
-    MPI_Barrier( MPI_COMM_WORLD);
-    for (i=0;i<(DIMENTION*DIMENTION);i++){
-        gen[i]=auxGen[i];
+    MPI_Send( &t1 , 1 , MPI_INT , 0 , 0 , MPI_COMM_WORLD);
+    if(myId==0){
+        for(int h=0; h<nProc ; h++){
+            MPI_Recv( &t1 , 1 , MPI_INT , h , 0 , MPI_COMM_WORLD , NULL);
+            t2+=t1;
+        }
+        printf("%d\n",t2);
+        /* for (i=0;i<(DIMENTION*DIMENTION);i++){
+            gen[i]=auxGen[i];
+        } */
     }
 }
 
@@ -125,11 +134,11 @@ int main(int argc, char* argv[]){
 
     populate(grid);
 
-    countFinalCells(grid, 0);
+    //countFinalCells(grid, 0);
     //printField(grid);
     for(i = 1; i<=NGENERATIONS; i++){
         newGen(grid, auxGrid);
-        countFinalCells(grid, i);
+        //countFinalCells(grid, i);
     }
     //countFinalCells(grid, i);
     MPI_Finalize();
