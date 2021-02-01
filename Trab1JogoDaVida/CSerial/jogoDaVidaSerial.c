@@ -4,7 +4,7 @@
 
 #define SRAND_VALUE 1985
 #define DIMENTION 2048 //2048*2048​ e um total de ​2000​ geracoes
-#define NGENERATIONS 2000
+#define NGENERATIONS 20
 
 void populate(int *grid){ //popula aleatoriamente a matriz
     srand(SRAND_VALUE);

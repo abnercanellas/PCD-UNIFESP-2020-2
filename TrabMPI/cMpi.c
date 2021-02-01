@@ -5,10 +5,11 @@
 #include <sys/time.h>
 
 #define SRAND_VALUE 1985
-#define DIMENTION 5 //2048*2048​ e um total de ​2000​ geracoes
-#define NGENERATIONS 5
-
-
+#define DIMENTION 2048 //2048*2048​ e um total de ​2000​ geracoes
+#define NGENERATIONS 20
+/* Geracao 19: 701293
+Geracao 20: 690063
+ */
 void populate(int *grid){ //popula aleatoriamente a matriz
     srand(SRAND_VALUE);
     int i, j;
@@ -102,27 +103,38 @@ int newCellState(int* gen, int i, int j){//Define o futuro da celula de acordo c
 
 void newGen(int *gen, int* auxGen){ //funcao que realiza a atualização da geracao
 
-    int i, j, myId, nProc, t1=0, t2=0;
+    int i, j, myId, nProc;
+
+    int *recGen = (int *)malloc(DIMENTION * DIMENTION *sizeof(int));
+
     MPI_Comm_size( MPI_COMM_WORLD , &nProc);
     MPI_Comm_rank( MPI_COMM_WORLD , &myId);
 
     for(i=myId; i < DIMENTION; i+=nProc){
         for (j = 0; j < DIMENTION; j++){
-            //auxGen[i * DIMENTION + j] =  newCellState(gen, i, j);
-            t1++;
+            auxGen[i * DIMENTION + j] =  newCellState(gen, i, j);
         }
     }
-    MPI_Send( &t1 , 1 , MPI_INT , 0 , 0 , MPI_COMM_WORLD);
+
+    if(myId!=0){
+        MPI_Send( auxGen , (DIMENTION * DIMENTION) , MPI_INT , 0 , 1 , MPI_COMM_WORLD);
+    }
     if(myId==0){
-        for(int h=0; h<nProc ; h++){
-            MPI_Recv( &t1 , 1 , MPI_INT , h , 0 , MPI_COMM_WORLD , NULL);
-            t2+=t1;
+        for(i=0; i < DIMENTION; i+=nProc){//copia a porção que o master processou para prox geracao
+            for (j = 0; j < DIMENTION; j++){
+                gen[i * DIMENTION + j] = auxGen[i * DIMENTION + j] ;
+            }
         }
-        printf("%d\n",t2);
-        /* for (i=0;i<(DIMENTION*DIMENTION);i++){
-            gen[i]=auxGen[i];
-        } */
+        for(int h=1; h<nProc ; h++){
+            MPI_Recv( recGen, (DIMENTION * DIMENTION) , MPI_INT , h , 1 , MPI_COMM_WORLD , NULL);
+            for(i=h; i < DIMENTION; i+=nProc){
+                for (j = 0; j < DIMENTION; j++){
+                    gen[i * DIMENTION + j] = recGen[i * DIMENTION + j] ;
+                }
+            }
+        }
     }
+    MPI_Bcast( gen , (DIMENTION * DIMENTION), MPI_INT , 0 , MPI_COMM_WORLD);
 }
 
 int main(int argc, char* argv[]){
@@ -138,7 +150,7 @@ int main(int argc, char* argv[]){
     //printField(grid);
     for(i = 1; i<=NGENERATIONS; i++){
         newGen(grid, auxGrid);
-        //countFinalCells(grid, i);
+        countFinalCells(grid, i);
     }
     //countFinalCells(grid, i);
     MPI_Finalize();
