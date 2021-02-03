@@ -1,3 +1,10 @@
+/* 
+    integrantes:
+        Abner Y. D. C. Canellas, RA: 150738;
+        Henrique D C Silveira, RA: 93930;
+        Jonatas da Silva Oliveira, RA: 99640;
+        Raphael Gomes Autuori, RA:120569.
+ */
 #include <stdlib.h>
 #include <mpi.h>
 #include <math.h>
@@ -106,7 +113,7 @@ void newGen(int *gen, int* auxGen){ //funcao que realiza a atualização da gera
 int main(int argc, char* argv[]){ //main
 
     MPI_Init(&argc, &argv);
-      
+    //i * DIMENTION + j
     int *grid = (int *)malloc(DIMENTION * DIMENTION *sizeof(int)), *auxGrid = (int *)malloc(DIMENTION * DIMENTION *sizeof(int));
     int i;
 
